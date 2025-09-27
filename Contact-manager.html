@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Chatbot Support & Tools — The Instaprofit System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    html { scroll-behavior: smooth; }
+    .headline { font-family: 'Russo One', system-ui, sans-serif; }
+    .bodyfont { font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, 'Apple Color Emoji', 'Segoe UI Emoji', sans-serif; }
+    .glass { backdrop-filter: blur(10px); background: rgba(255,255,255,0.08); }
+    
+    /* Chatbot specific styles */
+    #chatbot-container {
+        position: fixed;
+        bottom: 80px;
+        right: 20px;
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+    }
+    #chatbot-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background-color: #ec4899; /* pink-500 */
+        color: white;
+        font-size: 24px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        cursor: pointer;
+        transition: transform 0.3s;
+    }
+    #chatbot-button:hover {
+        transform: scale(1.1);
+    }
+    #chatbot-window {
+        display: none;
+        width: 350px;
+        height: 500px;
+        margin-bottom: 15px;
+        border-radius: 12px;
+        background-color: #1a202c; /* slate-900 */
+        border: 1px solid rgba(255,255,255,0.1);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        overflow: hidden;
+        animation: fadeIn 0.3s ease-in-out;
+        flex-direction: column;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    #chat-header {
+        background-color: #3f3f46; /* slate-700 */
+        color: white;
+        padding: 10px 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: 600;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    #chat-messages {
+        flex-grow: 1;
+        padding: 16px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    #chat-messages::-webkit-scrollbar {
+        width: 8px;
+    }
+    #chat-messages::-webkit-scrollbar-thumb {
+        background-color: rgba(255, 255, 255, 0.2);
+        border-radius: 4px;
+    }
+    #chat-input-container {
+        padding: 10px;
+        border-top: 1px solid rgba(255,255,255,0.1);
+        display: flex;
+        gap: 8px;
+    }
+    .message {
+        padding: 8px 12px;
+        border-radius: 8px;
+        max-width: 80%;
+    }
+    .user-message {
+        background-color: #ec4899; /* pink-500 */
+        color: white;
+        align-self: flex-end;
+    }
+    .bot-message {
+        background-color: #3f3f46; /* slate-700 */
+        color: white;
+        align-self: flex-start;
+    }
+    .message-loader {
+        display: flex;
+        gap: 4px;
+        align-items: center;
+    }
+    .dot {
+        width: 8px;
+        height: 8px;
+        background-color: #94a3b8; /* slate-400 */
+        border-radius: 50%;
+        animation: bounce 1.4s infinite ease-in-out both;
+    }
+    .dot:nth-child(1) { animation-delay: -0.32s; }
+    .dot:nth-child(2) { animation-delay: -0.16s; }
+    @keyframes bounce {
+        0%, 80%, 100% { transform: scale(0); }
+        40% { transform: scale(1); }
+    }
+  </style>
+</head>
+<body class="bodyfont bg-slate-950 text-slate-100 min-h-screen flex flex-col">
+  
+  <header class="sticky top-0 z-40 bg-slate-950/70 backdrop-blur border-b border-white/10">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="h-9 w-9 rounded-2xl bg-gradient-to-br from-pink-500 to-purple-600 grid place-items-center font-black text-slate-900">JV</div>
+        <span class="headline text-lg tracking-wide">Instaprofit JV Program</span>
+      </div>
+      <a href="index.html" class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 px-4 py-2 font-semibold text-slate-900 shadow-lg shadow-pink-500/20 hover:scale-[1.02] transition">
+        Back to Home
+      </a>
+    </div>
+  </header>
+
+  <section class="flex-grow py-16 md:py-24 text-center">
+    <div class="max-w-3xl mx-auto px-4">
+      <h1 class="headline text-4xl md:text-5xl">Welcome to our Support Center</h1>
+      <p class="mt-4 text-slate-400">Need help? Use our new chatbot to get instant answers about the JV program, product details, or common affiliate issues. Just click the floating icon in the bottom right corner! contact email: <strong class="text-lg text-pink-500">theinstaprofitsystem@gmail.com</strong></p>
+    </div>
+  </section>
+
+  <footer class="border-t border-white/10 py-2 mt-4">
+    <div class="text-center text-xs text-slate-500 pb-2">© <span id="year"></span> Instaprofit JV Program. All rights reserved.</div>
+  </footer>
+
+  <div id="chatbot-container">
+    <div id="chatbot-window">
+      <div id="chat-header">
+        <span>Instaprofit Support Bot</span>
+      </div>
+      <div id="chat-messages">
+        <div class="bot-message">Hello! I'm here to help with questions about the Instaprofit System and our affiliate program. How can I assist you today?</div>
+      </div>
+      <div id="chat-input-container">
+        <input type="text" id="chat-input" placeholder="Type your message..." class="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-pink-500">
+        <button id="send-btn" class="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 px-4 py-2 font-semibold text-slate-900">Send</button>
+      </div>
+    </div>
+    <button id="chatbot-button">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+      </svg>
+    </button>
+  </div>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Elements for Chatbot
+    const chatbotButton = document.getElementById('chatbot-button');
+    const chatbotWindow = document.getElementById('chatbot-window');
+    const chatInput = document.getElementById('chat-input');
+    const sendButton = document.getElementById('send-btn');
+    const chatMessages = document.getElementById('chat-messages');
+
+    // Toggle chatbot window visibility
+    chatbotButton.addEventListener('click', () => {
+      const isVisible = chatbotWindow.style.display === 'flex';
+      chatbotWindow.style.display = isVisible ? 'none' : 'flex';
+      if (!isVisible) {
+        chatInput.focus();
+      }
+    });
+
+    // Send message on button click or Enter key press
+    sendButton.addEventListener('click', sendMessage);
+    chatInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        sendMessage();
+      }
+    });
+
+    // Function to handle sending messages
+    async function sendMessage() {
+      const userMessage = chatInput.value.trim();
+      if (!userMessage) return;
+
+      // Append user message to chat history
+      appendMessage(userMessage, 'user');
+      chatInput.value = '';
+      
+      // Add loading indicator
+      const loader = appendLoadingIndicator();
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+
+      // Call Gemini API for chatbot
+      const systemPrompt = `You are an expert support bot for the Instaprofit JV Program. Your primary goal is to provide concise, direct, and relevant answers to affiliate questions. Do not give long, conversational replies. Here is your knowledge base. Refer to it for all answers: 
+PAYMENT: Gumroad pays directly through PayPal or Direct Bank Transfer. Payouts are handled via Gumroad.com, weekly or monthly depending on settings. A minimum of $10 is required before payouts. Payments are sent every Friday. You can change your payout method in Gumroad settings.
+APPROVAL: After signing up, you will receive your affiliate link within a maximum of 24 hours. Approval is required.
+RESOURCES: We provide a complete resource kit, including: Ready-made Ad Creatives (FB/IG Images + Copy + Story Templates), Mini Funnel Templates (plug & play landing pages), 2-3 Video Promo Scripts (viral-style), 10 Ready-Made Viral Reels, 10 Captions, 5 Canva Posts, 5 Email Swipes. You can find these resources inside the JV home page.
+FUNNELS & LANDING PAGES: We provide ready-to-use funnel templates. You can also use your own funnel. A website is not required to promote.
+TARGET AUDIENCE: The product is perfect for Instagram users, online earners, students, freelancers, and entrepreneurs who want to grow their online presence and income. It's for anyone interested in online business, digital marketing, and passive income opportunities.
+PROMOTION METHODS: You can promote using Instagram theme pages, Facebook groups, TikTok & YouTube Shorts, Email marketing, and Paid ads (optional). You can promote on multiple social media platforms. Use ethical promotion methods.
+REFUNDS: If a refund happens (less than 5% cases), the commission for that sale will be deducted. The refund rate is less than 5%, which is very low.
+SALES & TRACKING: Gumroad provides 100% transparent tracking for clicks, conversions, and commissions. Sales are tracked properly with your unique Gumroad affiliate link. Your Gumroad dashboard shows sales, clicks, and earnings in real-time. Make sure to use your exact Gumroad affiliate link.
+UPSELLS & COMMISSIONS: Currently, the base offer is $14.99 with a $9 commission. Commissions are one-time per sale. Future upsells will be added to increase affiliate earnings. If subscription offers are added in the future, affiliates will earn recurring commissions. You earn 60% commission on every sale.
+SUPPORT: For support, you can email us at theinstaprofitsystem@gmail.com or simply ask this chatbot.
+SIGNUP: Click the signup button, create your Gumroad affiliate account, grab your link, and start promoting instantly. You just need a Gumroad account.
+PRODUCT INFO: The product is high-demand, with positive feedback, making it easy for affiliates to sell. It's evergreen, so you can promote it all year round. We recommend checking the product to understand it better. We don't usually provide free copies, but may give special access to top affiliates. Product updates are notified via email.
+TRAFFIC: Results depend on traffic. Some affiliates make sales within 24 hours. Even with 100-200 targeted clicks, sales have been made. Quality traffic matters more than quantity.
+TECHNICAL SKILLS: No, you don't need technical skills. We provide plug & play templates and creatives.
+ADVERTISING: You can use Facebook Ads, Instagram Ads, or Google Ads. We provide ready-made ad creatives. We recommend sending traffic to a funnel or landing page instead of direct linking. You can run retargeting ads. Do not post links on coupon/deal sites.
+AFFILIATE STRATEGY: To maximize sales, follow this strategy: 1. Use viral reels. 2. Add engaging captions. 3. Drive traffic to the mini funnel. 4. Send follow-up emails.
+GENERAL: Joining the affiliate program is completely free. We sometimes run contests and special rewards for top affiliates. We sometimes share affiliate success stories. You can create your own custom creatives, but make them ethical and accurate. If you face technical issues on Gumroad, contact Gumroad support or message us on this email theinstaprofitsystem@gmail.com , and we’ll guide you.
+If a question is not about the Instaprofit JV Program, state that you can only assist with topics related to the program.`;
+      const userQuery = userMessage;
+      const apiKey = "AIzaSyBrDjSkMonV6Hhy4hxg9ZneMvUVoxzqnb0";
+      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+      const payload = {
+        contents: [{ role: "user", parts: [{ text: userQuery }] }],
+        tools: [{ "google_search": {} }],
+        systemInstruction: {
+          parts: [{ text: systemPrompt }]
+        },
+      };
+
+      const maxRetries = 5;
+      let retries = 0;
+      let delay = 1000;
+
+      while (retries < maxRetries) {
+        try {
+          const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          if (!response.ok) {
+            throw new Error(`API error: ${response.statusText}`);
+          }
+
+          const result = await response.json();
+          const generatedText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+          // Remove the loader
+          loader.remove();
+
+          if (generatedText) {
+            appendMessage(generatedText, 'bot');
+          } else {
+            // Fallback message as per user's request
+            appendMessage("I'm sorry, I'm unable to answer that question. For a solution, please email the product owner at theinstaprofitsystem@gmail.com. You will receive an answer within 24 hours.", 'bot');
+          }
+          break; // Success, exit loop
+        } catch (error) {
+          console.error('Error fetching from Gemini API:', error);
+          retries++;
+          if (retries < maxRetries) {
+            console.log(`Retrying in ${delay}ms...`);
+            await new Promise(res => setTimeout(res, delay));
+            delay *= 2;
+          } else {
+            // Remove the loader
+            loader.remove();
+            appendMessage("I'm sorry, I'm having trouble connecting right now. Please try again later.", 'bot');
+          }
+        }
+      }
+    }
+
+    // Function to append a message to the chat window
+    function appendMessage(text, sender) {
+      const messageElement = document.createElement('div');
+      messageElement.textContent = text;
+      messageElement.classList.add('message', `${sender}-message`);
+      chatMessages.appendChild(messageElement);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // Function to add a loading indicator
+    function appendLoadingIndicator() {
+      const loadingElement = document.createElement('div');
+      loadingElement.classList.add('message', 'bot-message', 'message-loader');
+      loadingElement.innerHTML = `
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      `;
+      chatMessages.appendChild(loadingElement);
+      return loadingElement;
+    }
+  </script>
+
+</body>
+</html>
